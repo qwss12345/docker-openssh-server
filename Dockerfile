@@ -8,13 +8,15 @@ MAINTAINER junyu "tyrone-zhao@qq.com"
 RUN sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
 RUN apt-get update && apt-get install -y ssh
 RUN mkdir /var/run/sshd
-RUN sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config
+RUN sed -i 's/#Port 22/Port 8080/g' /etc/ssh/sshd_config
 RUN echo "root:123456" | chpasswd
 RUN sed -ri 's/^#PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 
 # 对外暴露2222端口
-EXPOSE 2222
+EXPOSE 8080
+
+ENV PORT=8080
 
 # 将默认的命令设置为启动sshd服务
 CMD ["service", "ssh", "start"]
