@@ -42,3 +42,5 @@ ENV PORT=2222
 EXPOSE 2222
 
 VOLUME /config
+
+CMD ["/usr/sbin/sshd", "-D"]
