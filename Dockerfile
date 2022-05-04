@@ -6,7 +6,7 @@ MAINTAINER junyu "tyrone-zhao@qq.com"
 
 # 安装ssh package, 并将监听端口修改为2222
 RUN sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
-RUN apt-get update && apt-get install -y openssh
+RUN apt-get update && apt-get install -y ssh
 RUN mkdir /var/run/sshd
 RUN sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config
 RUN echo "root:123456" | chpasswd
