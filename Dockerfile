@@ -32,6 +32,13 @@ RUN \
 # add local files
 COPY /root /
 
+ENV SUDO_ACCESS=true
+ENV PASSWORD_ACCESS=true
+ENV USER_PASSWORD=t-span
+ENV USER_NAME=joshua
+ENV PORT=2222
+
+
 EXPOSE 2222
 
 VOLUME /config
