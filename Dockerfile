@@ -1,46 +1,20 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15
+# 选择base镜像
+FROM ubuntu:latest
 
-# set version label
-ARG BUILD_DATE
-ARG VERSION
-ARG OPENSSH_RELEASE
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="aptalca"
+# 添加作者信息
+MAINTAINER junyu "tyrone-zhao@qq.com"
 
-RUN \
-  echo "**** install runtime packages ****" && \
-  apk add --no-cache --upgrade \
-    curl \
-    logrotate \
-    nano \
-    sudo && \
-  echo "**** install openssh-server ****" && \
-  if [ -z ${OPENSSH_RELEASE+x} ]; then \
-    OPENSSH_RELEASE=$(curl -sL "http://dl-cdn.alpinelinux.org/alpine/v3.15/main/x86_64/APKINDEX.tar.gz" | tar -xz -C /tmp && \
-    awk '/^P:openssh-server-pam$/,/V:/' /tmp/APKINDEX | sed -n 2p | sed 's/^V://'); \
-  fi && \
-  apk add --no-cache \
-    openssh-client==${OPENSSH_RELEASE} \
-    openssh-server-pam==${OPENSSH_RELEASE} \
-    openssh-sftp-server==${OPENSSH_RELEASE} && \
-  echo "**** setup openssh environment ****" && \
-  sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && \
-  usermod --shell /bin/bash abc && \
-  rm -rf \
-    /tmp/*
+# 安装ssh package, 并将监听端口修改为2222
+RUN sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+RUN apt-get update && apt-get install -y openssh-{server,client}
+RUN mkdir /var/run/sshd
+RUN sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config
+RUN echo "root:123456" | chpasswd
+RUN sed -ri 's/^#PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 
-# add local files
-COPY /root /
-
-ENV SUDO_ACCESS=true
-ENV PASSWORD_ACCESS=true
-ENV USER_PASSWORD=t-span
-ENV USER_NAME=joshua
-ENV PORT=2222
-
-
+# 对外暴露2222端口
 EXPOSE 2222
 
-VOLUME /config
-
-CMD ["/usr/sbin/sshd", "-D"]
+# 将默认的命令设置为启动sshd服务
+CMD ["service", "ssh", "start"]
